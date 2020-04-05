@@ -1,0 +1,105 @@
+-> stworzenie nowego monitora:
+1> P = pollution:createMonitor().
+{monitor,#{},#{}}
+
+
+-> dodanie 3 nowych stacji - próba ponownego dodania kolejnej stacji kończy się niepowodzeniem
+2> P1 = pollution:addStation("Aleja Slowackiego", {50.2345, 18.3445}, P).
+{monitor,#{"Aleja Slowackiego" => {50.2345,18.3445}},#{}}
+
+3> P2 = pollution:addStation("Aleja Mickiewicza", {10.2345, 18.3445}, P1).
+{monitor,#{"Aleja Mickiewicza" => {10.2345,18.3445},
+           "Aleja Slowackiego" => {50.2345,18.3445}},
+         #{}}
+4> P3 = pollution:addStation("Wawel", {20.2245, 48.5445}, P2).
+
+{monitor,#{"Aleja Mickiewicza" => {10.2345,18.3445},
+           "Aleja Slowackiego" => {50.2345,18.3445},
+           "Wawel" => {20.2245,48.5445}},
+         #{}}
+
+5> P4 = pollution:addStation("Wawel", {20.2245, 48.5445}, P3).
+Station with given name has already been registered!
+
+
+-> dodanie nowych pomiarów - próba dodania pomiaru o parametrach występujących już w zbiorze pomiarów kończy się niepowodzeniem
+6> P5 = pollution:addValue("Aleja Slowackiego", calendar:local_time(), "PM10", 39, P3).
+{monitor,#{"Aleja Mickiewicza" => {10.2345,18.3445},
+           "Aleja Slowackiego" => {50.2345,18.3445},
+           "Wawel" => {20.2245,48.5445}},
+         #{{{50.2345,18.3445},{{2020,4,5},21},"PM10"} => 39}}
+
+7> P6 = pollution:addValue("Aleja Mickiewicza", {{2020,4,5},{15,2,1}}, "PM10", 79, P5).
+{monitor,#{"Aleja Mickiewicza" => {10.2345,18.3445},
+           "Aleja Slowackiego" => {50.2345,18.3445},
+           "Wawel" => {20.2245,48.5445}},
+         #{{{10.2345,18.3445},{{2020,4,5},15},"PM10"} => 79,
+           {{50.2345,18.3445},{{2020,4,5},21},"PM10"} => 39}}
+
+8> P7 = pollution:addValue("Aleja Mickiewicza", {{2020,4,3},{13,2,1}}, "PM10", 59, P6).
+{monitor,#{"Aleja Mickiewicza" => {10.2345,18.3445},
+           "Aleja Slowackiego" => {50.2345,18.3445},
+           "Wawel" => {20.2245,48.5445}},
+         #{{{10.2345,18.3445},{{2020,4,3},13},"PM10"} => 59,
+           {{10.2345,18.3445},{{2020,4,5},15},"PM10"} => 79,
+           {{50.2345,18.3445},{{2020,4,5},21},"PM10"} => 39}}
+
+9> P8 = pollution:addValue("Aleja Mickiewicza", {{2020,4,3},{13,2,1}}, "PM10", 59, P7).
+Measurement with given parameters has already been registered!
+
+
+-> poprawne usuwanie pomiarów - niemożność usunięcia nieistniejącego pomiaru
+12> pollution:removeValue({10.2345,18.3445},{{2020,4,5},15},"PM10",P7).
+{monitor,#{"Aleja Mickiewicza" => {10.2345,18.3445},
+           "Aleja Slowackiego" => {50.2345,18.3445},
+           "Wawel" => {20.2245,48.5445}},
+         #{{{10.2345,18.3445},{{2020,4,3},13},"PM10"} => 59,
+           {{50.2345,18.3445},{{2020,4,5},21},"PM10"} => 39}}
+
+13> pollution:removeValue({10.2345,18.3445},{{2020,4,5},15},"PM5",P7).
+Can't delete measurement that doesnt't exist!
+
+
+-> pobieranie jednej wartości:
+14> P7.
+{monitor,#{"Aleja Mickiewicza" => {10.2345,18.3445},
+           "Aleja Slowackiego" => {50.2345,18.3445},
+           "Wawel" => {20.2245,48.5445}},
+         #{{{10.2345,18.3445},{{2020,4,3},13},"PM10"} => 59,
+           {{10.2345,18.3445},{{2020,4,5},15},"PM10"} => 79,
+           {{50.2345,18.3445},{{2020,4,5},21},"PM10"} => 39}}
+
+16> pollution:getOneValue("Aleja Mickiewicza", {{2020,4,5},15}, "PM10", P7).
+79
+
+17> pollution:getOneValue("Aleja Mickiewicza", {{2020,4,5},15}, "PM5", P7).
+Can't return the value of measurement that doesn't exist! - w mapie z pomiarami nie istnieje taki o typie "PM5"
+
+
+-> funkcja getStationMean:
+18> pollution:getStationMean("Aleja Mickiewicza", "PM10", P7). - oczekiwany wynik: (59 + 79) / 2 = 69
+69.0
+
+19> pollution:getStationMean({50.2345,18.3445}, "PM10", P7). - oczekiwany wynik: 39 / 1 = 39
+39.0
+
+
+-> funkcja getDailyMean:
+21> pollution:getDailyMean("PM10", {2020,4,5}, P7). - oczekiwany wynik: (39 + 79) / 2 = 59
+59.0
+
+22> pollution:getDailyMean("PM10", {2020,4,45}, P7).
+Given date is incorrect! - wyłapany bład wpisania niepoprawnej daty (dzień 45)
+
+
+-> funkcja niespodzianka getMonthlyMean - oczekiwany wynik: (39 + 79 + 59) / 3 = 59
+23> pollution:getMonthlyMean("PM10", {2020,4}, P7).
+59.0
+
+
+-> funkcja niespodzianka getExceededMeasurements:
+26> pollution:getExceededMeasurements("PM10", {2020,4,5}, 10, P7). - 5 kwietnia 2020 roku dołączono do zbioru pomiarów 2 pomiary nie przekraczające normy 10 dla "PM10"
+2
+
+27> pollution:getExceededMeasurements("PM10", {2020,4,5}, 60, P7). - 5 kwietnia 2020 roku dołączono do zbioru pomiarów 1 pomiar nie przekraczający normy 60 dla "PM10"
+1

@@ -1,51 +1,34 @@
+%%%-------------------------------------------------------------------
+%%% @author Lenovo
+%%% @copyright (C) 2020, <COMPANY>
+%%% @doc
+%%%
+%%% @end
+%%% Created : 05. kwi 2020 22:20
+%%%-------------------------------------------------------------------
 -module(onp).
--author("Barto.sz").
+-author("Lenovo").
 
--export([onp/1]).
+%% API
+-export([calculator/1]).
 
-onp(List) -> onpStack(string:tokens(List, " "), []).
-
-onpStack([], [Stack]) ->
-  Stack;
-onpStack([H | T], Stack) ->
-  case lists:member(H, ["0","1","2","3","4","5","6","7","8","9","-1","-2","-3","-4","-5","-6","-7","-8","-9"]) of
-    true -> onpStack(T, [list_to_integer(H) | Stack]);
-    false -> case lists:member(H, ["+","-","*","/","pow","veclen"]) of
-               true -> binaryOperator([H | T], Stack);
-               false -> unaryOperator([H | T], Stack)
-             end
+parse(String) ->
+  case string:to_float(String) of
+    {error, no_float} -> list_to_integer(String) * 1.0;
+    {X, _} -> X
   end.
 
-binaryOperator([H | T], [T1, T2 | Stack]) ->
-  if H == "+" ->
-      onpStack(T, [T1 + T2 | Stack]);
-    H == "-" ->
-      onpStack(T, [T1 - T2 | Stack]);
-    H == "*" ->
-      onpStack(T, [T1 * T2 | Stack]);
-    H == "/" ->
-      onpStack(T, [T1 / T2 | Stack]);
-    H == "pow" ->
-      onpStack(T, [list_to_integer(float_to_list(math:pow(T1, T2),[{decimals,0}])) | Stack]);
-    H == "veclen" ->
-      onpStack(T, [list_to_integer(float_to_list(veclen(T1, T2),[{decimals,0}])) | Stack])
-  end.
+calculator(Formula) -> calculate(string:tokens(Formula, " "), []).
 
-unaryOperator([H | T], [T1| Stack]) ->
-  if H == "sqrt" ->
-      onpStack(T, [list_to_integer(float_to_list(math:sqrt(T1),[{decimals,0}])) | Stack]);
-    H == "sin" ->
-      onpStack(T, [list_to_integer(float_to_list(math:sin(T1),[{decimals,0}])) | Stack]);
-    H == "cos" ->
-      onpStack(T, [list_to_integer(float_to_list(math:cos(T1),[{decimals,0}])) | Stack]);
-    H == "tg" ->
-      onpStack(T, [list_to_integer(float_to_list(math:tan(T1),[{decimals,0}])) | Stack]);
-    H == "increment" ->
-      onpStack(T, [increment(T1) | Stack])
-  end.
-
-veclen(X, Y) ->
-  math:sqrt(math:pow(X,2) + math:pow(Y,2)).
-
-increment(A) ->
-  A + 1.
+calculate([], [H | []]) -> H;
+calculate(["+" | T1], [X, Y | T2]) -> calculate(T1, [X + Y | T2]);
+calculate(["-" | T1], [X, Y | T2]) -> calculate(T1, [Y - X | T2]);
+calculate(["*" | T1], [X, Y | T2]) -> calculate(T1, [X * Y | T2]);
+calculate(["/" | T1], [X, Y | T2]) -> calculate(T1, [Y / X | T2]);
+calculate(["sqrt" | T1], [X | T2]) -> calculate(T1, [math:sqrt(X) | T2]);
+calculate(["pow" | T1], [X, Y | T2]) -> calculate(T1, [math:pow(Y, X) | T2]);
+calculate(["sin" | T1], [X | T2]) -> calculate(T1, [math:sin(X) | T2]);
+calculate(["cos" | T1], [X | T2]) -> calculate(T1, [math:cos(X) | T2]);
+calculate(["double" | T1], [X | T2]) -> calculate(T1, [X * 2 | T2]);
+calculate(["pit" | T1], [X, Y | T2]) -> calculate(T1, [math:pow(X, 2) + math:pow(Y, 2) | T2]);
+calculate([H | T1], Stack) -> calculate(T1, [parse(H) | Stack]).
