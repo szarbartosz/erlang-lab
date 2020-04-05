@@ -1,15 +1,5 @@
-%%%-------------------------------------------------------------------
-%%% @author Lenovo
-%%% @copyright (C) 2020, <COMPANY>
-%%% @doc
-%%%
-%%% @end
-%%% Created : 05. kwi 2020 22:20
-%%%-------------------------------------------------------------------
 -module(onp).
 -author("Lenovo").
-
-%% API
 -export([onp/1]).
 
 onp(S) -> calculateRPN(string:tokens(S, " "), []).
