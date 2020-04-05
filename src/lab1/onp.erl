@@ -10,25 +10,39 @@
 -author("Lenovo").
 
 %% API
--export([calculator/1]).
+-export([onp/1]).
 
-parse(String) ->
-  case string:to_float(String) of
-    {error, no_float} -> list_to_integer(String) * 1.0;
-    {X, _} -> X
+onp(S) -> calculateRPN(string:tokens(S, " "), []).
+
+calculateRPN([], [Stack]) -> Stack;
+calculateRPN([H | T], Stack) ->
+  case re:run(H, "^[0-9]*$") /= nomatch of
+    true -> calculateRPN(T, [list_to_integer(H) | Stack]);
+    false -> case re:run(H, "^[0-9]+[.][0-9]+$") /= nomatch of
+               true -> calculateRPN(T, [list_to_float(H) | Stack]);
+               false -> calculateRPN2([H | T], Stack)
+             end
   end.
 
-calculator(Formula) -> calculate(string:tokens(Formula, " "), []).
-
-calculate([], [H | []]) -> H;
-calculate(["+" | T1], [X, Y | T2]) -> calculate(T1, [X + Y | T2]);
-calculate(["-" | T1], [X, Y | T2]) -> calculate(T1, [Y - X | T2]);
-calculate(["*" | T1], [X, Y | T2]) -> calculate(T1, [X * Y | T2]);
-calculate(["/" | T1], [X, Y | T2]) -> calculate(T1, [Y / X | T2]);
-calculate(["sqrt" | T1], [X | T2]) -> calculate(T1, [math:sqrt(X) | T2]);
-calculate(["pow" | T1], [X, Y | T2]) -> calculate(T1, [math:pow(Y, X) | T2]);
-calculate(["sin" | T1], [X | T2]) -> calculate(T1, [math:sin(X) | T2]);
-calculate(["cos" | T1], [X | T2]) -> calculate(T1, [math:cos(X) | T2]);
-calculate(["double" | T1], [X | T2]) -> calculate(T1, [X * 2 | T2]);
-calculate(["pit" | T1], [X, Y | T2]) -> calculate(T1, [math:pow(X, 2) + math:pow(Y, 2) | T2]);
-calculate([H | T1], Stack) -> calculate(T1, [parse(H) | Stack]).
+calculateRPN2(["+" | T], [S1, S2 | Stack]) ->
+  calculateRPN(T, [S1 + S2 | Stack]);
+calculateRPN2(["-" | T], [S1, S2 | Stack]) ->
+  calculateRPN(T, [S2 - S1 | Stack]);
+calculateRPN2(["*" | T], [S1, S2 | Stack]) ->
+  calculateRPN(T, [S1 * S2 | Stack]);
+calculateRPN2(["/" | T], [S1, S2 | Stack]) ->
+  calculateRPN(T, [S2 / S1 | Stack]);
+calculateRPN2(["pow" | T], [S1, S2 | Stack]) ->
+  calculateRPN(T, [math:pow(S2, S1) | Stack]);
+calculateRPN2(["sqrt" | T], [S | Stack]) ->
+  calculateRPN(T, [math:sqrt(S) | Stack]);
+calculateRPN2(["sin" | T], [S | Stack]) ->
+  calculateRPN(T, [math:sin(math:pi() * S / 180) | Stack]);
+calculateRPN2(["cos" | T], [S | Stack]) ->
+  calculateRPN(T, [math:cos(math:pi() * S / 180) | Stack]);
+calculateRPN2(["tan" | T], [S | Stack]) ->
+  calculateRPN(T, [math:tan(math:pi() * S / 180) | Stack]);
+calculateRPN2(["double" | T], [S | Stack]) ->
+  calculateRPN(T, [S * 2 | Stack]);
+calculateRPN2(["avg" | T], [S1, S2 | Stack]) ->
+  calculateRPN(T, [(S1 + S2) / 2 | Stack]).
