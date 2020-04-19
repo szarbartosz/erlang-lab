@@ -2,37 +2,37 @@
 -author("Lenovo").
 -export([onp/1]).
 
-onp(S) -> calculateRPN(string:tokens(S, " "), []).
+onp(S) -> onpStack(string:tokens(S, " "), []).
 
-calculateRPN([], [Stack]) -> Stack;
-calculateRPN([H | T], Stack) ->
+onpStack([], [Stack]) -> Stack;
+onpStack([H | T], Stack) ->
   case re:run(H, "^[0-9]*$") /= nomatch of
-    true -> calculateRPN(T, [list_to_integer(H) | Stack]);
+    true -> onpStack(T, [list_to_integer(H) | Stack]);
     false -> case re:run(H, "^[0-9]+[.][0-9]+$") /= nomatch of
-               true -> calculateRPN(T, [list_to_float(H) | Stack]);
-               false -> calculateRPN2([H | T], Stack)
+               true -> onpStack(T, [list_to_float(H) | Stack]);
+               false -> onpStackOperator([H | T], Stack)
              end
   end.
 
-calculateRPN2(["+" | T], [S1, S2 | Stack]) ->
-  calculateRPN(T, [S1 + S2 | Stack]);
-calculateRPN2(["-" | T], [S1, S2 | Stack]) ->
-  calculateRPN(T, [S2 - S1 | Stack]);
-calculateRPN2(["*" | T], [S1, S2 | Stack]) ->
-  calculateRPN(T, [S1 * S2 | Stack]);
-calculateRPN2(["/" | T], [S1, S2 | Stack]) ->
-  calculateRPN(T, [S2 / S1 | Stack]);
-calculateRPN2(["pow" | T], [S1, S2 | Stack]) ->
-  calculateRPN(T, [math:pow(S2, S1) | Stack]);
-calculateRPN2(["sqrt" | T], [S | Stack]) ->
-  calculateRPN(T, [math:sqrt(S) | Stack]);
-calculateRPN2(["sin" | T], [S | Stack]) ->
-  calculateRPN(T, [math:sin(math:pi() * S / 180) | Stack]);
-calculateRPN2(["cos" | T], [S | Stack]) ->
-  calculateRPN(T, [math:cos(math:pi() * S / 180) | Stack]);
-calculateRPN2(["tan" | T], [S | Stack]) ->
-  calculateRPN(T, [math:tan(math:pi() * S / 180) | Stack]);
-calculateRPN2(["double" | T], [S | Stack]) ->
-  calculateRPN(T, [S * 2 | Stack]);
-calculateRPN2(["avg" | T], [S1, S2 | Stack]) ->
-  calculateRPN(T, [(S1 + S2) / 2 | Stack]).
+onpStackOperator(["+" | T], [S1, S2 | Stack]) ->
+  onpStack(T, [S1 + S2 | Stack]);
+onpStackOperator(["-" | T], [S1, S2 | Stack]) ->
+  onpStack(T, [S2 - S1 | Stack]);
+onpStackOperator(["*" | T], [S1, S2 | Stack]) ->
+  onpStack(T, [S1 * S2 | Stack]);
+onpStackOperator(["/" | T], [S1, S2 | Stack]) ->
+  onpStack(T, [S2 / S1 | Stack]);
+onpStackOperator(["pow" | T], [S1, S2 | Stack]) ->
+  onpStack(T, [math:pow(S2, S1) | Stack]);
+onpStackOperator(["sqrt" | T], [S | Stack]) ->
+  onpStack(T, [math:sqrt(S) | Stack]);
+onpStackOperator(["sin" | T], [S | Stack]) ->
+  onpStack(T, [math:sin(math:pi() * S / 180) | Stack]);
+onpStackOperator(["cos" | T], [S | Stack]) ->
+  onpStack(T, [math:cos(math:pi() * S / 180) | Stack]);
+onpStackOperator(["tan" | T], [S | Stack]) ->
+  onpStack(T, [math:tan(math:pi() * S / 180) | Stack]);
+onpStackOperator(["double" | T], [S | Stack]) ->
+  onpStack(T, [S * 2 | Stack]);
+onpStackOperator(["avg" | T], [S1, S2 | Stack]) ->
+  onpStack(T, [(S1 + S2) / 2 | Stack]).
