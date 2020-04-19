@@ -1,0 +1,7 @@
+Pomiar czasu dla 3 wersji programu (dane: 1000 paczkomatów i 10000 osób)
+
+wersja sekwencyjna: 6172000 microsec
+wersja bardzo równoległa: 2516000 microsec
+wersja mniej równoległa (8 rdzeni): 2406000 microsec
+
+procesor: intel core i7-8550U (4 rdzenie)
