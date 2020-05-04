@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 04. maj 2020 21:31
 %%%-------------------------------------------------------------------
--module(polluiton_gen_server_test).
+-module(pollution_gen_server_test).
 -author("szarb").
 
 -include_lib("eunit/include/eunit.hrl").
@@ -70,7 +70,7 @@ removeValue_test() ->
   ?assertEqual(ok, pollution_gen_server:removeValue("station 2", {{Y, M, D}, H}, "PM 10")),
   ?assertEqual(ok, pollution_gen_server:removeValue({4, 4}, {{2018, 04, 12}, 12}, "temperature")).
 
-crash_test() ->
-  pollution_gen_server:crash(),
-  timer:sleep(50),
-  ?assert(lists:member(pollution_gen_server, registered())).
+stop_test() ->
+  ?assertEqual(ok, pollution_gen_server:stop()),
+  timer:sleep(100),
+  ?assert(not lists:member(pollution_gen_server, registered())).
