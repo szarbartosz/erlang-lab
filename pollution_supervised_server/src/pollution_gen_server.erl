@@ -12,7 +12,7 @@
 -behaviour(gen_server).
 
 %% API
--export([start_link/0, addStation/2, addValue/4, removeValue/3, getOneValue/3, getStationMean/2, getDailyMean/2, getMonthlyMean/2, getExceededMeasurements/3, crash/0, stop/0]).
+-export([start_link/0, addStation/2, addValue/4, removeValue/3, getOneValue/3, getStationMean/2, getDailyMean/2, getMonthlyMean/2, getExceededMeasurements/3, crash/0, stop/0, showMonitor/0]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2]).
@@ -35,6 +35,9 @@
 %% @doc Spawns the server and registers the local name (unique)
 start_link() ->
   gen_server:start_link({local, ?SERVER}, ?MODULE, pollution:createMonitor(), []).
+
+showMonitor() ->
+  gen_server:call(?MODULE, showMonitor).
 
 %%%===================================================================
 %%% gen_server callbacks
@@ -120,7 +123,9 @@ handle_call({getDailyMean, [Type, Date]}, _From, Monitor) ->
 handle_call({getMonthlyMean, [Type, Date]}, _From, Monitor) ->
   {reply, pollution:getMonthlyMean(Type, Date, Monitor), Monitor};
 handle_call({getExceededMeasurements, [Type, Date, Norm]}, _From, Monitor) ->
-  {reply, pollution:getExceededMeasurements(Type, Date, Norm, Monitor), Monitor}.
+  {reply, pollution:getExceededMeasurements(Type, Date, Norm, Monitor), Monitor};
+handle_call(showMonitor, _From, Monitor) ->
+  {reply, Monitor, Monitor}.
 
 %% @private
 %% @doc Handling all non call/cast messages

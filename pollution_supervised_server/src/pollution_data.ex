@@ -63,7 +63,7 @@ defmodule PollutionData do
     stationMean = fn () -> :pollution_gen_server.getStationMean('station_20.06_49.986', 'PM10') end
     dailyMean = fn () -> :pollution_gen_server.getDailyMean('PM10', {2017, 5, 3}) end
     IO.puts("#{ stationMean |> :timer.tc([]) |> elem(0)} microseconds")
-    IO.puts("#{ dailyMean |> :timer.tc([]) |> elem(0)} microseconds")
+    IO.puts("#{ dailyMean |> :timer.tc([]) |> elem(0)} microseconds}")
   end
 
 end
