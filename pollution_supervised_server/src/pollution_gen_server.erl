@@ -105,7 +105,8 @@ handle_cast(crash, _) ->
 handle_cast(stop, Monitor) ->
   {stop, normal, Monitor}.
 
-handle_cast_response({error, Message}, Monitor) -> erlang:display({error, Message}), {noreply, Monitor};
+handle_cast_response({error, _}, Monitor) -> {noreply, Monitor};
+%%handle_cast_response({error, Message}, Monitor) -> erlang:display({error, Message}), {noreply, Monitor};
 handle_cast_response(UpdatedMonitor, _) -> {noreply, UpdatedMonitor}.
 
 %% @private

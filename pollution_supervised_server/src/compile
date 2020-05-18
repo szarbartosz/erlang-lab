@@ -1,0 +1,11 @@
+c("pollution_gen_server.erl").
+c("pollution.erl").
+c("pollution_supervised_server_sup.erl").
+c("pollution_data.ex").
+c("pollution_supervised_server_app.erl").
+
+l(:pollution_gen_server)
+l(:pollution)
+l(:pollution_supervised_server_sup)
+c("pollution_data.ex")
+l(:pollution_supervised_server_app)
